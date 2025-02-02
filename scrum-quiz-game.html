@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Qui veut devenir un Maître Scrum ?</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --correct-color: #22c55e;
+            --wrong-color: #ef4444;
+            --hover-color: #1d4ed8;
+            --background-color: #f3f4f6;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+
+        body {
+            background-color: var(--background-color);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .game-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            width: 100%;
+            max-width: 800px;
+            padding: 24px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .level {
+            font-size: 1.125rem;
+            color: var(--primary-color);
+        }
+
+        .score {
+            font-weight: bold;
+            font-size: 1.125rem;
+        }
+
+        .category {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 12px;
+        }
+
+        .question {
+            font-size: 1.125rem;
+            color: #4b5563;
+            margin-bottom: 24px;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .option {
+            padding: 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 1rem;
+            background: none;
+            text-align: left;
+        }
+
+        .option:hover:not(:disabled) {
+            background-color: #f3f4f6;
+        }
+
+        .option:disabled {
+            cursor: not-allowed;
+        }
+
+        .option.correct {
+            background-color: var(--correct-color);
+            color: white;
+            border-color: var(--correct-color);
+        }
+
+        .option.wrong {
+            background-color: var(--wrong-color);
+            color: white;
+            border-color: var(--wrong-color);
+        }
+
+        .explanation {
+            background-color: #eff6ff;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+        }
+
+        .next-button {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            float: right;
+            font-size: 1rem;
+            transition: background-color 0.2s;
+        }
+
+        .next-button:hover {
+            background-color: var(--hover-color);
+        }
+
+        .game-over {
+            text-align: center;
+        }
+
+        .trophy {
+            font-size: 4rem;
+            margin-bottom: 16px;
+        }
+
+        @media (max-width: 640px) {
+            .game-container {
+                padding: 16px;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 12px;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app" class="game-container"></div>
+
+    <script>
+        const questions = [
+            {
+                level: 1,
+                points: 1000,
+                category: "Valeurs Agiles",
+                question: "Quelle est la première valeur du Manifeste Agile ?",
+                options: [
+                    "Les processus et les outils",
+                    "Les individus et leurs interactions",
+                    "La documentation exhaustive",
+                    "Le suivi d'un plan"
+                ],
+                correctIndex: 1,
+                explanation: "Les individus et leurs interactions sont plus importants que les processus et les outils. Cette valeur souligne l'importance du facteur humain dans le développement logiciel."
+            },
+            {
+                level: 2,
+                points: 5000,
+                category: "Rôles Scrum",
+                question: "Qui est responsable de maximiser la valeur du produit ?",
+                options: [
+                    "Le Scrum Master",
+                    "L'équipe de développement",
+                    "Le Product Owner",
+                    "Le chef de projet"
+                ],
+                correctIndex: 2,
+                explanation: "Le Product Owner est le gardien de la valeur ! Il priorise le backlog et s'assure que le produit répond aux besoins des utilisateurs."
+            },
+            {
+                level: 3,
+                points: 10000,
+                category: "Artéfacts Scrum",
+                question: "Qu'est-ce que le Product Backlog ?",
+                options: [
+                    "Un rapport de bugs",
+                    "Une liste ordonnée de tout ce qui est nécessaire au produit",
+                    "Le planning des vacances de l'équipe",
+                    "Un document technique"
+                ],
+                correctIndex: 1,
+                explanation: "Le Product Backlog est une liste ordonnée et dynamique de tout ce qui pourrait être nécessaire dans le produit."
+            },
+            {
+                level: 4,
+                points: 50000,
+                category: "Événements Scrum",
+                question: "Quelle est la durée recommandée du Daily Scrum ?",
+                options: [
+                    "5 minutes",
+                    "15 minutes",
+                    "30 minutes",
+                    "1 heure"
+                ],
+                correctIndex: 1,
+                explanation: "Le Daily Scrum est timeboxé à 15 minutes pour rester concentré et efficace."
+            },
+            {
+                level: 5,
+                points: 100000,
+                category: "Maîtrise Scrum",
+                question: "Lors d'un Sprint, un membre de la direction demande d'ajouter une fonctionnalité urgente. Que devrait faire le Scrum Master ?",
+                options: [
+                    "Accepter immédiatement la demande",
+                    "Protéger l'équipe et rediriger la demande vers le Product Owner",
+                    "Annuler le Sprint",
+                    "Prolonger le Sprint"
+                ],
+                correctIndex: 1,
+                explanation: "Le Scrum Master protège l'équipe des interruptions externes et s'assure que toute nouvelle demande passe par le Product Owner."
+            }
+        ];
+
+        class ScrumGame {
+            constructor() {
+                this.currentQuestion = 0;
+                this.score = 0;
+                this.app = document.getElementById('app');
+                this.render();
+            }
+
+            handleAnswer(index) {
+                const options = document.querySelectorAll('.option');
+                options.forEach(option => option.disabled = true);
+                
+                const currentQ = questions[this.currentQuestion];
+                if (index === currentQ.correctIndex) {
+                    options[index].classList.add('correct');
+                    this.score += currentQ.points;
+                } else {
+                    options[index].classList.add('wrong');
+                    options[currentQ.correctIndex].classList.add('correct');
+                }
+
+                const explanation = document.createElement('div');
+                explanation.className = 'explanation';
+                explanation.textContent = currentQ.explanation;
+                
+                const nextButton = document.createElement('button');
+                nextButton.className = 'next-button';
+                nextButton.textContent = this.currentQuestion < questions.length - 1 ? 'Question Suivante' : 'Voir les Résultats';
+                nextButton.onclick = () => this.nextQuestion();
+
+                this.app.appendChild(explanation);
+                this.app.appendChild(nextButton);
+            }
+
+            nextQuestion() {
+                if (this.currentQuestion < questions.length - 1) {
+                    this.currentQuestion++;
+                    this.render();
+                } else {
+                    this.showGameOver();
+                }
+            }
+
+            showGameOver() {
+                this.app.innerHTML = `
+                    <div class="game-over">
+                        <div class="trophy">🏆</div>
+                        <h1 class="category">Félicitations !</h1>
+                        <p class="question">Score Final: ${this.score} points</p>
+                        <p class="explanation">Vous êtes maintenant prêt à appliquer vos connaissances Scrum dans vos projets !</p>
+                        <button class="next-button" onclick="new ScrumGame()">Rejouer</button>
+                    </div>
+                `;
+            }
+
+            render() {
+                const question = questions[this.currentQuestion];
+                this.app.innerHTML = `
+                    <div class="header">
+                        <div class="level">Niveau ${question.level}</div>
+                        <div class="score">Score: ${this.score} points</div>
+                    </div>
+                    <div class="category">${question.category}</div>
+                    <div class="question">${question.question}</div>
+                    <div class="options">
+                        ${question.options.map((option, index) => `
+                            <button class="option" onclick="game.handleAnswer(${index})">
+                                ${String.fromCharCode(65 + index)}. ${option}
+                            </button>
+                        `).join('')}
+                    </div>
+                `;
+            }
+        }
+
+        let game = new ScrumGame();
+    </script>
+</body>
+</html>
